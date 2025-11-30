@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "server-management",
+  "version": "${version}",
+  "name": "server-management",
+  "description": "This Minecraft Fabric Mod provides an easy way of communicating with the server using a WebSocket connection and HTTP REST API.",
+  "authors": [],
+  "contact": {},
+  "license": "LGPL-3.0",
+  "icon": "assets/server-management/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "fabric-datagen": [
+      "dev.loat.server_management.client.ServerManagementDataGenerator"
+    ],
+    "main": [
+      "dev.loat.server_management.ServerManagement"
+    ]
+  },
+  "mixins": [
+    "server-management.mixins.json",
+    {
+      "config": "server-management.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
