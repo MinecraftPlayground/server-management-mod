@@ -1,0 +1,80 @@
+name: 'Build Mod .jar'
+
+env:
+  ARTIFACT_NAME: 'server_management'
+
+on:
+  workflow_call: {}
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+
+    paths:
+      - 'build.gradle'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'settings.gradle'
+      - '.github/workflows/build.yml'
+      - 'gradle/**'
+      - 'src/**'
+  
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    steps:
+      - uses: actions/checkout@v4
+          
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: 'Setup Gradle'
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          build-scan-publish: true
+          build-scan-terms-of-use-agree: "yes"
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
+
+      - name: 'Build with Gradle Wrapper'
+        run: |-
+          ./gradlew build --scan
+          ls -la build/libs/
+
+      - name: 'Save Artifact'
+        uses: actions/upload-artifact@v4
+        id: save-artifact
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ github.workspace }}/build/libs/*.jar
+
+  dependency-submission:
+    if: ${{ github.ref_type == 'branch' && github.ref_name == 'main' }}
+    runs-on: ubuntu-latest
+    name: Dependency Submission
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 21
+
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v4
+        with:
+          build-scan-publish: true
+          build-scan-terms-of-use-agree: "yes"
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
