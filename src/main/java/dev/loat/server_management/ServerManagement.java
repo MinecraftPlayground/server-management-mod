@@ -1,5 +1,6 @@
 package dev.loat.server_management;
 
+import dev.loat.server_management.api.ApiServer;
 import dev.loat.server_management.command.CommandManager;
 import dev.loat.server_management.config.Config;
 import dev.loat.server_management.config.files.ServerManagementConfigFile;
@@ -14,14 +15,15 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 public class ServerManagement implements ModInitializer {
     private static ServerManagementConfigFile config;
+    private ApiServer apiServer;
 
     /**
      * Appends the Server Management Logger to the current server instance.
      */
-    private static void appendLogger() {
+    private void appendLogger() {
         var context = (LoggerContext) LogManager.getContext(false);
         var logger = context.getConfiguration().getLoggers().get("");
-        var logAppender = new LogAppender();
+        var logAppender = new LogAppender(this.apiServer);
         logAppender.start();
         logger.addAppender(
             logAppender,
@@ -35,20 +37,28 @@ public class ServerManagement implements ModInitializer {
     public void onInitialize() {
         Logger.setLoggerClass(ServerManagement.class);
 
+        Logger.debug("Loading config file...");
+
         ServerManagement.config = Config.load(
             Config.resolve("config.yaml"),
             ServerManagementConfigFile.class
         );
-        ServerManagement.appendLogger();
-
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             CommandManager.register();
+
+            this.apiServer = new ApiServer(ServerManagement.config.port, server);
+            Logger.debug("Starting API server...");
+            this.apiServer.start();
+
+            this.appendLogger();
 
             Logger.info("Server Management started!");
         });
 
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            this.apiServer.stop();
+
             Logger.info("Server Management stopped!");
         });
     }

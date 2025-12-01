@@ -6,14 +6,14 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import static net.minecraft.server.command.CommandManager.literal;
 
 
-public final class CommandManager {
+public class CommandManager {
     public static void register() {
         CommandRegistrationCallback.EVENT.register((
             dispatcher,
             registryAccess,
             environment
         ) -> dispatcher.register(
-            literal("server-management").executes(Help::execute)
+            literal("servermanagement").executes(Help::execute)
                 .then(literal("help").executes(Help::execute))
                 .then(literal("reload").executes(Reload::execute))
         ));

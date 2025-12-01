@@ -4,10 +4,10 @@ import dev.loat.server_management.config.parser.YamlSerializer;
 import dev.loat.server_management.logging.Logger;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -15,7 +15,7 @@ import java.nio.file.Path;
 public final class Config {
     private static final String rootDirectory = "server_management";
 
-    public static <ConfigFile> @Nullable ConfigFile load(
+    public static <ConfigFile> ConfigFile load(
         @NotNull Path path,
         Class<ConfigFile> configFileClass
     ) {
@@ -35,7 +35,16 @@ public final class Config {
             return config.parse();
         } catch (Exception exception) {
             Logger.error("Error while loading the config file: {}", exception);
-            return null;
+            try {
+                return configFileClass.getDeclaredConstructor().newInstance();
+            } catch (
+                InstantiationException |
+                IllegalAccessException |
+                InvocationTargetException |
+                NoSuchMethodException e
+            ) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
