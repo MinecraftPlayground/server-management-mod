@@ -42,7 +42,7 @@ public class ApiServer {
     public void broadcast(LogMessage message) {
         synchronized (this.clients) {
             for (WsConnectContext client : this.clients) {
-                var logLevels = client.queryParams("level");
+                var logLevels = client.queryParams("channel");
                 var logLevel = message.logLevel.toString().toLowerCase();
 
                 if (logLevels.isEmpty()) {

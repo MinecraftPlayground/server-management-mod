@@ -17,7 +17,7 @@ public final class Log {
 
             openContext.enableAutomaticPings();
 
-            Logger.info("Client connected: \"{}\" with channels: {}", openContext.host(), openContext.queryParams("level").toString());
+            Logger.info("Client connected: \"{}\" with channels: {}", openContext.host(), openContext.queryParams("channel").toString());
         });
 
         ws.onClose(closeContext -> {
