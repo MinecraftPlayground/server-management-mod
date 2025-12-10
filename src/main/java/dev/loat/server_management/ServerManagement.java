@@ -44,9 +44,9 @@ public class ServerManagement implements ModInitializer {
             ServerManagementConfigFile.class
         );
 
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            CommandManager.register();
+        CommandManager.register();
 
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             this.apiServer = new ApiServer(ServerManagement.config.port, server);
             Logger.debug("Starting API server...");
             this.apiServer.start();
